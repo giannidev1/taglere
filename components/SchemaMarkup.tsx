@@ -5,7 +5,7 @@ export default function SchemaMarkup() {
     name: 'Tagle Real Estate',
     description: 'San Diego\'s only 0.5% commission full-service real estate brokerage',
     url: 'https://taglere.com',
-    telephone: '+1-619-555-0100',
+    telephone: '+1-619-363-6347',
     email: 'gianni@taglere.com',
     address: {
       '@type': 'PostalAddress',

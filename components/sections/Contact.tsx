@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin, Loader2, CheckCircle } from 'lucide-react';
 import FadeIn from '../animations/FadeIn';
 import Button from '../ui/Button';
+import AddressAutocomplete from '../ui/AddressAutocomplete';
 
 interface FormData {
   name: string;
@@ -18,37 +19,64 @@ interface FormData {
 export default function Contact() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
+    control,
   } = useForm<FormData>();
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
+    setError(null);
 
-    // TODO: Integrate with your email service (Formspree, Resend, etc.)
-    // For now, we'll simulate a submission
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    try {
+      const payload = {
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        propertyAddress: data.address?.trim() || undefined,
+        message: data.message?.trim() || undefined,
+      };
 
-    console.log('Form data:', data);
+      console.log('Submitting contact form:', payload);
 
-    setIsSubmitting(false);
-    setIsSuccess(true);
-    reset();
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
 
-    // Reset success message after 5 seconds
-    setTimeout(() => setIsSuccess(false), 5000);
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to send message');
+      }
+
+      setIsSuccess(true);
+      reset();
+
+      // Reset success message after 5 seconds
+      setTimeout(() => setIsSuccess(false), 5000);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to send message. Please try again.');
+      console.error('Form submission error:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const contactInfo = [
     {
       icon: Phone,
       label: 'Phone',
-      value: '(619) 555-0100',
-      href: 'tel:+16195550100',
+      value: '(619) 363-6347',
+      href: 'tel:+16193636347',
     },
     {
       icon: Mail,
@@ -201,7 +229,7 @@ export default function Contact() {
                   className={`w-full px-4 py-3 rounded-lg border ${
                     errors.phone ? 'border-red-500' : 'border-gray-300'
                   } focus:ring-2 focus:ring-gold focus:border-transparent transition-all`}
-                  placeholder="(619) 555-0100"
+                  placeholder="(619) 363-6347"
                 />
                 {errors.phone && (
                   <motion.p
@@ -219,12 +247,20 @@ export default function Contact() {
                 <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-2">
                   Property Address
                 </label>
-                <input
-                  {...register('address')}
-                  type="text"
-                  id="address"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-gold focus:border-transparent transition-all"
-                  placeholder="123 Main St, San Diego, CA"
+                <Controller
+                  name="address"
+                  control={control}
+                  defaultValue=""
+                  render={({ field }) => (
+                    <AddressAutocomplete
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      error={!!errors.address}
+                      placeholder="123 Main St, San Diego, CA"
+                      id="address"
+                    />
+                  )}
                 />
               </div>
 
@@ -270,7 +306,17 @@ export default function Contact() {
                   animate={{ opacity: 1, y: 0 }}
                   className="text-center text-green-600 font-medium"
                 >
-                  Thanks for reaching out! I'll get back to you soon.
+                  Thanks! I'll be in touch within 24 hours.
+                </motion.p>
+              )}
+
+              {error && (
+                <motion.p
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="text-center text-red-600 font-medium"
+                >
+                  {error}
                 </motion.p>
               )}
             </form>

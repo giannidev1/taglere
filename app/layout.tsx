@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import SchemaMarkup from "@/components/SchemaMarkup";
 
@@ -42,6 +43,12 @@ export default function RootLayout({
     <html lang="en" className="scroll-smooth">
       <head>
         <SchemaMarkup />
+        {process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY && (
+          <Script
+            src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY}&libraries=places`}
+            strategy="beforeInteractive"
+          />
+        )}
       </head>
       <body className={`${inter.variable} font-sans`}>
         {children}

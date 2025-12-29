@@ -52,7 +52,7 @@ export default function Footer() {
 
           {/* DRE License (Required in California) */}
           <div className="text-sm text-gray-500">
-            DRE License #XXXXXXX
+            DRE License #02250353
           </div>
 
           {/* Divider */}
