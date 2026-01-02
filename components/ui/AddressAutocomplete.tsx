@@ -5,6 +5,16 @@ import usePlacesAutocomplete, { getGeocode } from 'use-places-autocomplete';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Loader2 } from 'lucide-react';
 
+declare global {
+  interface Window {
+    google?: {
+      maps?: {
+        places?: unknown;
+      };
+    };
+  }
+}
+
 interface AddressAutocompleteProps {
   value: string;
   onChange: (value: string) => void;

@@ -1,6 +1,8 @@
 import { Resend } from 'resend';
 import { NextRequest, NextResponse } from 'next/server';
 import { Client as HubSpotClient } from '@hubspot/api-client';
+import { FilterOperatorEnum } from '@hubspot/api-client/lib/codegen/crm/contacts';
+import { AssociationSpecAssociationCategoryEnum } from '@hubspot/api-client/lib/codegen/crm/objects/notes';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -361,7 +363,7 @@ export async function POST(request: NextRequest) {
                   filters: [
                     {
                       propertyName: 'email',
-                      operator: 'EQ',
+                      operator: FilterOperatorEnum.Eq,
                       value: email,
                     },
                   ],
@@ -402,7 +404,7 @@ export async function POST(request: NextRequest) {
                 to: { id: contactId },
                 types: [
                   {
-                    associationCategory: 'HUBSPOT_DEFINED',
+                    associationCategory: AssociationSpecAssociationCategoryEnum.HubspotDefined,
                     associationTypeId: 202, // Note to Contact association
                   },
                 ],
