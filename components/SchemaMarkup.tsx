@@ -23,6 +23,11 @@ export default function SchemaMarkup() {
       name: 'Gianni Tagle',
       jobTitle: 'Principal Broker',
     },
+    identifier: {
+      '@type': 'PropertyValue',
+      name: 'California DRE License',
+      value: '02250353',
+    },
     sameAs: [
       // Add social media profiles here when available
       // 'https://www.linkedin.com/in/giannitagle',

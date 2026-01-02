@@ -11,7 +11,7 @@ export default function About() {
     {
       icon: Award,
       label: 'Licensed Broker',
-      value: 'DRE #XXXXXXX',
+      value: 'DRE #02250353',
     },
     {
       icon: Users,
