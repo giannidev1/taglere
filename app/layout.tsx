@@ -15,9 +15,17 @@ export const metadata: Metadata = {
   description: "Sell your home with Tagle Real Estate and keep your equity. 0.5% commission, full service, no compromises. San Diego's only 0.5% full-service brokerage.",
   keywords: ["San Diego real estate", "low commission", "0.5% commission", "real estate broker", "Gianni Tagle"],
   authors: [{ name: "Gianni Tagle" }],
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+    apple: [
+      { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+  },
   openGraph: {
-    title: "Tagle Real Estate | 0.5% Commission",
-    description: "Sell your home and keep your equity. 0.5% commission, full service.",
+    title: "Tagle Real Estate | 0.5% Full-Service Real Estate",
+    description: "San Diego's only 0.5% commission full-service brokerage. Sell your home and keep your equity. No compromises.",
     url: "https://taglere.com",
     siteName: "Tagle Real Estate",
     locale: "en_US",
@@ -25,8 +33,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Tagle Real Estate | 0.5% Commission",
-    description: "Sell your home and keep your equity. 0.5% commission, full service.",
+    title: "Tagle Real Estate | 0.5% Full-Service Real Estate",
+    description: "San Diego's only 0.5% commission full-service brokerage. Sell your home and keep your equity.",
   },
   robots: {
     index: true,

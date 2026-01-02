@@ -1,14 +1,14 @@
 import { ImageResponse } from 'next/og'
 
-// Image metadata
+// Apple touch icon metadata
 export const size = {
-  width: 32,
-  height: 32,
+  width: 180,
+  height: 180,
 }
 export const contentType = 'image/png'
 
-// Icon generation - TRƎ logo
-export default function Icon() {
+// Apple touch icon generation - TRƎ logo
+export default function AppleIcon() {
   return new ImageResponse(
     (
       <div
@@ -19,7 +19,7 @@ export default function Icon() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          borderRadius: 4,
+          borderRadius: 32,
         }}
       >
         <div
@@ -27,9 +27,9 @@ export default function Icon() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontSize: 13,
+            fontSize: 72,
             fontWeight: 800,
-            letterSpacing: '-0.5px',
+            letterSpacing: '-2px',
           }}
         >
           <span style={{ color: '#ffffff' }}>TR</span>
