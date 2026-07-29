@@ -51,23 +51,23 @@ export default function About() {
         </FadeIn>
 
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
-          {/* Headshot — see IMAGES.md to swap in the real photo */}
+          {/* Drop the real photo in at public/headshot.jpg — no code change
+              needed. If the square crop cuts the face awkwardly, adjust
+              `object-center` below (e.g. `object-[center_25%]`). */}
           <FadeIn direction="left" delay={0.2}>
             <motion.div
               className="relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-brand to-brand-light shadow-lift"
               whileHover={{ scale: 1.02 }}
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center text-white/60">
-                  <div className="w-32 h-32 mx-auto mb-4 rounded-full bg-white/10 flex items-center justify-center">
-                    <User className="w-16 h-16" />
-                  </div>
-                  <p className="text-sm uppercase tracking-wider">
-                    Professional Headshot
-                  </p>
-                </div>
-              </div>
+              <Image
+                src="/headshot.jpg"
+                alt="Gianni Tagle"
+                fill
+                sizes="(min-width: 1024px) 40vw, 90vw"
+                className="object-cover object-center"
+                quality={90}
+              />
               <div className="absolute inset-0 border-4 border-accent/20 rounded-2xl" />
             </motion.div>
           </FadeIn>

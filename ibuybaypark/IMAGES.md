@@ -13,24 +13,37 @@ Drop replacements into `public/` using the exact filenames below. No code change
 | `bay-park-hero.jpg` | Full-bleed hero, behind the headline | taglere's `hero-bg.jpg` | Bay Park hillside looking west over Mission Bay at golden hour. Shot from the Morena/Bay Park ridge. Landscape, at least 2400px wide. Keep the centre reasonably uncluttered — the headline sits on top of it under a dark overlay. |
 | `mission-bay.jpg` | About section, 25% opacity | taglere's `mission-beach.jpg` | Mission Bay water or the view from the neighborhood. Heavily faded in use, so mood matters more than sharpness. Landscape, 1800px+. |
 | `bay-park-street.jpg` | Calculator section, 20% opacity | taglere's `la-jolla.jpg` | A residential Bay Park street — the single-storey post-war stock, mature trees, cars in driveways. Recognisably a real neighborhood, not a listing photo. Landscape, 1800px+. |
-| `headshot.jpg` | About section — **not yet wired up** | placeholder block | Gianni, square crop, friendly rather than corporate. This is the "I'm a neighbor, not a call centre" proof point. 800×800 or larger. |
+| `headshot.jpg` | About section | generated "GT" placeholder card | Gianni, friendly rather than corporate. This is the "I'm a neighbor, not a call centre" proof point. 800×800 or larger. |
 
-## Wiring up the headshot
+## The headshot
 
-`components/sections/About.tsx` currently renders a placeholder block. Once
-`public/headshot.jpg` exists, replace the inner placeholder `<div>` with:
+**Already wired up.** `components/sections/About.tsx` renders `/headshot.jpg` directly, so
+replacing the file is the only step — no code change.
 
-```tsx
-<Image
-  src="/headshot.jpg"
-  alt="Gianni Tagle"
-  fill
-  className="object-cover"
-  quality={90}
-/>
+```bash
+cp ~/path/to/your-photo.jpg ibuybaypark/public/headshot.jpg
+npm run dev   # check the About section
 ```
 
-Keep the surrounding `motion.div` and the accent border — only the inner placeholder goes.
+The file currently committed is a generated placeholder card (dark blue, "GT" monogram, the
+word PLACEHOLDER). It exists only so the build stays green — `next/image` throws on a missing
+file. It is obviously not a photo, so it can't be mistaken for finished work.
+
+### One thing to check after you swap it
+
+The frame is a **square** (`aspect-square` with `object-cover`). A landscape photo will be
+cropped to its centre, losing the left and right edges. If your photo has the head high in the
+frame and the square crop cuts the chin or leaves too much headroom, adjust the object position
+in `About.tsx`:
+
+```tsx
+className="object-cover object-center"        // default
+className="object-cover object-[center_25%]"  // pulls the crop upward
+className="object-cover object-top"           // aligns to the top edge
+```
+
+A head-and-shoulders shot on a plain light background works best here — it sits next to body
+copy on a pale section, so a busy background competes with the text.
 
 ## Notes
 
