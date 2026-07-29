@@ -3,11 +3,6 @@
 /.pnp
 .pnp.js
 
-# ibuybaypark.com is a separate Next.js app living in this repo until it
-# gets its own repository — it has its own install and build output.
-/ibuybaypark/node_modules
-/ibuybaypark/.next
-
 # testing
 /coverage
 
