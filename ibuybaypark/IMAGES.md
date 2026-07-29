@@ -1,10 +1,10 @@
 # Photography
 
-**Current state: all three photos are placeholders carried over from taglere.com.** They are
-generic San Diego coastline, not Bay Park. The site builds and looks finished, but swapping
-these for real neighborhood photography is the single highest-impact improvement you can make —
-a seller who recognises their own streets trusts the page far more than one looking at stock
-coastline.
+**Current state: the headshot is real. The three scenic photos are placeholders** carried over
+from taglere.com — generic San Diego coastline, not Bay Park. The site builds and looks
+finished, but swapping those three for real neighborhood photography is the single
+highest-impact improvement left: a seller who recognises their own streets trusts the page far
+more than one looking at stock coastline.
 
 Drop replacements into `public/` using the exact filenames below. No code changes needed.
 
@@ -13,37 +13,29 @@ Drop replacements into `public/` using the exact filenames below. No code change
 | `bay-park-hero.jpg` | Full-bleed hero, behind the headline | taglere's `hero-bg.jpg` | Bay Park hillside looking west over Mission Bay at golden hour. Shot from the Morena/Bay Park ridge. Landscape, at least 2400px wide. Keep the centre reasonably uncluttered — the headline sits on top of it under a dark overlay. |
 | `mission-bay.jpg` | About section, 25% opacity | taglere's `mission-beach.jpg` | Mission Bay water or the view from the neighborhood. Heavily faded in use, so mood matters more than sharpness. Landscape, 1800px+. |
 | `bay-park-street.jpg` | Calculator section, 20% opacity | taglere's `la-jolla.jpg` | A residential Bay Park street — the single-storey post-war stock, mature trees, cars in driveways. Recognisably a real neighborhood, not a listing photo. Landscape, 1800px+. |
-| `headshot.jpg` | About section | generated "GT" placeholder card | Gianni, friendly rather than corporate. This is the "I'm a neighbor, not a call centre" proof point. 800×800 or larger. |
+| `headshot.jpg` | About section | ✅ **real photo, done** | — |
 
-## The headshot
+## The headshot — done
 
-**Already wired up.** `components/sections/About.tsx` renders `/headshot.jpg` directly, so
-replacing the file is the only step — no code change.
+`public/headshot.jpg` is Gianni's real headshot: 1391×1131, 202 KB, JPEG at quality 92.
+`components/sections/About.tsx` renders it via `next/image` with `object-cover object-center`.
 
-```bash
-cp ~/path/to/your-photo.jpg ibuybaypark/public/headshot.jpg
-npm run dev   # check the About section
-```
+The source is landscape (aspect 1.230) and the frame is square, so the centre crop trims about
+130px from each side. Checked at 1440px and 390px — the face sits well with a little headroom
+and the shoulders still read, so **no `object-position` adjustment is needed.**
 
-The file currently committed is a generated placeholder card (dark blue, "GT" monogram, the
-word PLACEHOLDER). It exists only so the build stays green — `next/image` throws on a missing
-file. It is obviously not a photo, so it can't be mistaken for finished work.
-
-### One thing to check after you swap it
-
-The frame is a **square** (`aspect-square` with `object-cover`). A landscape photo will be
-cropped to its centre, losing the left and right edges. If your photo has the head high in the
-frame and the square crop cuts the chin or leaves too much headroom, adjust the object position
-in `About.tsx`:
+If you ever swap in a different photo and the square crop cuts awkwardly, that's the one class
+to change in `About.tsx`:
 
 ```tsx
-className="object-cover object-center"        // default
+className="object-cover object-center"        // current
 className="object-cover object-[center_25%]"  // pulls the crop upward
 className="object-cover object-top"           // aligns to the top edge
 ```
 
-A head-and-shoulders shot on a plain light background works best here — it sits next to body
-copy on a pale section, so a busy background competes with the text.
+A head-and-shoulders shot on a plain light background works best in this slot — it sits next to
+body copy on a pale section, so a busy background competes with the text. The current photo's
+soft grey studio backdrop is ideal.
 
 ## Notes
 
