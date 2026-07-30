@@ -75,7 +75,13 @@ export default function Process() {
   return (
     <section
       id="process"
-      className="on-dark relative z-10 overflow-hidden bg-brand px-6 text-sand lg:px-8"
+      /*
+       * No `overflow-hidden` here, deliberately. An ancestor with a clipped
+       * overflow silently disables `position: sticky` on a descendant, which
+       * left the pinned panel scrolling away empty. ParallaxPlate clips itself,
+       * so the section does not need to.
+       */
+      className="on-dark relative z-10 bg-brand px-6 text-sand lg:px-8"
     >
       <ParallaxPlate
         plate={PLATES.canopy}
