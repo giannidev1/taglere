@@ -114,7 +114,14 @@ export default function Contact() {
         : 'border-ink/25 hover:border-ink/45 focus:border-accent',
     ].join(' ');
 
-  const labelClasses = 'text-eyebrow mb-2 block uppercase text-ink-muted';
+  /*
+   * Deliberately not uppercased, unlike the eyebrow labels elsewhere. These
+   * are the highest-stakes reading on the page and one of them is a question;
+   * all-caps costs word-shape and makes "When are you looking to sell?" read
+   * like shouting rather than asking.
+   */
+  const labelClasses =
+    'mb-2 block text-sm font-medium tracking-wide text-ink-soft';
 
   return (
     <section
