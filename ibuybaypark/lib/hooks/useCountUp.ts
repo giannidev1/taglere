@@ -13,8 +13,12 @@ import { usePrefersReducedMotion } from './usePrefersReducedMotion';
  *
  * Under reduced motion the figure simply stays at its final value.
  */
-export function useCountUp(end: number, duration: number = 1600, start: number = 0) {
-  const ref = useRef<HTMLElement>(null);
+export function useCountUp<T extends HTMLElement = HTMLElement>(
+  end: number,
+  duration: number = 1600,
+  start: number = 0
+) {
+  const ref = useRef<T>(null);
   const [count, setCount] = useState(end);
   const prefersReduced = usePrefersReducedMotion();
 

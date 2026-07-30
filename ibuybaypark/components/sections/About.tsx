@@ -1,126 +1,113 @@
 'use client';
 
-import FadeIn from '../animations/FadeIn';
-import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { Award, MapPin, User } from 'lucide-react';
+import Reveal from '../motion/Reveal';
+import ParallaxPlate from '../motion/ParallaxPlate';
+import { PLATES } from '@/lib/imagery';
 
+const CREDENTIALS = [
+  { icon: Award, label: 'Licensed Broker', value: 'DRE #02250353' },
+  { icon: MapPin, label: 'Local', value: 'Lived in Bay Park' },
+  { icon: User, label: 'Direct', value: 'You deal with me' },
+] as const;
+
+/**
+ * The person, on an asymmetric split: portrait in the narrow column, the
+ * argument in the wide one. Late light on stucco sits behind it, translating
+ * slower than the section.
+ *
+ * The portrait is a real photograph of a real broker. It is the one image on
+ * this page that must never be generated.
+ */
 export default function About() {
-  const credentials = [
-    {
-      icon: Award,
-      label: 'Licensed Broker',
-      value: 'DRE #02250353',
-    },
-    {
-      icon: MapPin,
-      label: 'Local',
-      value: 'Lived in Bay Park',
-    },
-    {
-      icon: User,
-      label: 'Direct',
-      value: 'You deal with me',
-    },
-  ];
-
   return (
-    <section id="about" className="py-24 lg:py-32 relative overflow-hidden min-h-[600px]">
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="/mission-bay.jpg"
-          alt=""
-          aria-hidden="true"
-          fill
-          className="object-cover opacity-25"
-          quality={85}
-        />
-      </div>
-      <div className="absolute inset-0 bg-gradient-to-br from-white/60 via-gray-50/50 to-white/60 z-[1]" />
-      <div className="absolute top-0 right-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl z-[2]" />
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-brand/5 rounded-full blur-3xl z-[2]" />
+    <section
+      id="about"
+      className="relative z-10 overflow-hidden bg-sand-deep px-6 py-24 lg:px-8 lg:py-36"
+    >
+      <ParallaxPlate
+        plate={PLATES.stucco}
+        strength={10}
+        opacity={0.3}
+        overlayClassName="bg-gradient-to-b from-sand-deep/90 via-sand-deep/78 to-sand-deep/92"
+      />
 
-      <div className="relative max-w-7xl mx-auto px-6 lg:px-8 z-10">
-        <FadeIn>
-          <h2 className="text-section text-center mb-4">
+      <div className="relative mx-auto max-w-6xl">
+        <header className="max-w-3xl">
+          <Reveal as="h2" className="text-section">
             A neighbor, not an out-of-town investor.
-          </h2>
-          <p className="text-xl text-gray-600 text-center mb-16 max-w-2xl mx-auto">
+          </Reveal>
+          <Reveal as="p" delay={90} className="mt-6 text-lg text-ink-muted">
             No call center, no lead-buying network, no algorithm in another state.
-          </p>
-        </FadeIn>
+          </Reveal>
+        </header>
 
-        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center max-w-6xl mx-auto">
-          {/* Drop the real photo in at public/headshot.jpg — no code change
-              needed. If the square crop cuts the face awkwardly, adjust
-              `object-center` below (e.g. `object-[center_25%]`). */}
-          <FadeIn direction="left" delay={0.2}>
-            <motion.div
-              className="relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-brand to-brand-light shadow-lift"
-              whileHover={{ scale: 1.02 }}
-              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            >
+        <div className="mt-16 grid gap-12 lg:mt-24 lg:grid-cols-12 lg:gap-16">
+          <Reveal delay={140} className="lg:col-span-5">
+            {/* Fixed aspect box: the portrait's space is reserved before it
+                loads, so it cannot shift the column. */}
+            <div className="relative aspect-[4/5] overflow-hidden bg-brand">
               <Image
-                src="/headshot.jpg"
-                alt="Gianni Tagle"
+                src={PLATES.portrait.src}
+                alt={PLATES.portrait.alt}
                 fill
                 sizes="(min-width: 1024px) 40vw, 90vw"
-                className="object-cover object-center"
-                quality={90}
+                quality={88}
+                className="object-cover object-[center_28%]"
               />
-              <div className="absolute inset-0 border-4 border-accent/20 rounded-2xl" />
-            </motion.div>
-          </FadeIn>
-
-          <FadeIn direction="right" delay={0.4}>
-            <div className="space-y-6">
-              <h3 className="text-3xl lg:text-4xl font-semibold text-gray-900">
-                Meet Gianni Tagle
-              </h3>
-
-              <div className="space-y-4 text-lg text-gray-600 leading-relaxed">
-                <p>
-                  I&rsquo;ve lived in Bay Park. I know the canyon streets, the bay views you only
-                  get from certain blocks, and the 1950s and &rsquo;60s housing stock &mdash;
-                  including what it actually costs to fix a foundation on a hillside lot or
-                  re-pipe a house that&rsquo;s never been touched.
-                </p>
-                <p>
-                  I&rsquo;m a licensed California real estate broker, and on this site I&rsquo;m
-                  not acting as anyone&rsquo;s agent &mdash; I&rsquo;m the buyer, purchasing for
-                  my own account with my own funds. That&rsquo;s exactly why there&rsquo;s no
-                  commission and no listing: there&rsquo;s no third party to pay.
-                </p>
-                <p>
-                  When you reach out, you get me. I&rsquo;m the one who walks your property, the
-                  one who writes the offer, and the one who answers the phone when you have a
-                  question at closing.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4 pt-6">
-                {credentials.map((cred, index) => {
-                  const Icon = cred.icon;
-                  return (
-                    <motion.div
-                      key={index}
-                      className="text-center p-4 rounded-xl bg-white border border-gray-200"
-                      whileHover={{ y: -2, borderColor: '#e08b4c' }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <Icon className="w-8 h-8 text-accent-deep mx-auto mb-2" />
-                      <div className="text-xs uppercase tracking-wider text-gray-400 mb-1">
-                        {cred.label}
-                      </div>
-                      <div className="text-sm font-semibold text-gray-900">
-                        {cred.value}
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
             </div>
-          </FadeIn>
+          </Reveal>
+
+          <div className="lg:col-span-7">
+            <Reveal as="h3" delay={180} className="text-3xl lg:text-4xl">
+              Meet Gianni Tagle
+            </Reveal>
+
+            <Reveal delay={230} className="mt-7 space-y-6 text-lg leading-relaxed text-ink-soft">
+              <p>
+                I&rsquo;ve lived in Bay Park. I know the canyon streets, the bay views you
+                only get from certain blocks, and the 1950s and &rsquo;60s housing stock
+                &mdash; including what it actually costs to fix a foundation on a hillside
+                lot or re-pipe a house that&rsquo;s never been touched.
+              </p>
+              <p>
+                I&rsquo;m a licensed California real estate broker, and on this site
+                I&rsquo;m not acting as anyone&rsquo;s agent &mdash; I&rsquo;m the buyer,
+                purchasing for my own account with my own funds. That&rsquo;s exactly why
+                there&rsquo;s no commission and no listing: there&rsquo;s no third party
+                to pay.
+              </p>
+              <p>
+                When you reach out, you get me. I&rsquo;m the one who walks your property,
+                the one who writes the offer, and the one who answers the phone when you
+                have a question at closing.
+              </p>
+            </Reveal>
+
+            <dl className="mt-12 grid gap-px border-y border-stucco bg-stucco sm:grid-cols-3">
+              {CREDENTIALS.map((credential, index) => {
+                const Icon = credential.icon;
+                return (
+                  <Reveal
+                    key={credential.label}
+                    delay={300 + index * 70}
+                    className="bg-sand-deep px-5 py-6"
+                  >
+                    <Icon
+                      aria-hidden="true"
+                      strokeWidth={1.25}
+                      className="h-6 w-6 text-accent-deep"
+                    />
+                    <dt className="mt-4 text-eyebrow uppercase text-ink-muted">
+                      {credential.label}
+                    </dt>
+                    <dd className="mt-2 font-medium text-ink">{credential.value}</dd>
+                  </Reveal>
+                );
+              })}
+            </dl>
+          </div>
         </div>
       </div>
     </section>

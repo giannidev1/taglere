@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import usePlacesAutocomplete, { getGeocode } from 'use-places-autocomplete';
-import { motion, AnimatePresence } from 'framer-motion';
 import { MapPin, Loader2 } from 'lucide-react';
 
 declare global {
@@ -163,33 +162,37 @@ export default function AddressAutocomplete({
           onChange={handleInput}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          className={`w-full px-4 py-3 ${showIcon ? 'pl-11' : ''} rounded-lg border ${
-            error ? 'border-red-500' : 'border-gray-300'
-          } focus:ring-2 focus:ring-accent focus:border-transparent transition-all ${className}`}
+          className={`w-full rounded-none border-0 border-b bg-transparent px-0 py-3 ${
+            showIcon ? 'pr-8' : ''
+          } text-ink placeholder:text-ink-muted/60 transition-colors duration-300 ease-settle focus:outline-none focus:ring-0 ${
+            error
+              ? 'border-red-700 focus:border-red-700'
+              : 'border-ink/25 hover:border-ink/45 focus:border-accent'
+          } ${className}`}
           placeholder={placeholder}
           autoComplete="off"
         />
         {showIcon && (
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+          <div className="pointer-events-none absolute right-0 top-1/2 -translate-y-1/2">
             {isPending ? (
-              <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+              <Loader2
+                aria-hidden="true"
+                className="h-5 w-5 animate-spin text-ink-muted"
+              />
             ) : (
-              <MapPin className="w-5 h-5 text-gray-400" />
+              <MapPin
+                aria-hidden="true"
+                strokeWidth={1.25}
+                className="h-5 w-5 text-ink-muted"
+              />
             )}
           </div>
         )}
       </div>
 
       {/* Suggestions */}
-      <AnimatePresence>
-        {showSuggestions && ready && status === 'OK' && data.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto"
-          >
+      {showSuggestions && ready && status === 'OK' && data.length > 0 && (
+        <div className="fade-up absolute z-50 mt-2 max-h-64 w-full overflow-y-auto border border-stucco bg-sand-light shadow-lift">
             {data.map((suggestion) => {
               const {
                 place_id,
@@ -202,25 +205,28 @@ export default function AddressAutocomplete({
                   key={place_id}
                   type="button"
                   onClick={() => handleSelect(description)}
-                  className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0 flex items-start gap-3 group"
+                  className="group flex w-full items-start gap-3 border-b border-stucco px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-sand"
                 >
-                  <MapPin className="w-4 h-4 text-gray-400 mt-1 flex-shrink-0 group-hover:text-accent-deep transition-colors" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-sm text-gray-900 truncate">{main_text}</div>
-                    <div className="text-xs text-gray-500 truncate">{secondary_text}</div>
+                  <MapPin
+                    aria-hidden="true"
+                    strokeWidth={1.25}
+                    className="mt-1 h-4 w-4 flex-shrink-0 text-ink-muted transition-colors group-hover:text-accent-deep"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm text-ink">{main_text}</div>
+                    <div className="truncate text-xs text-ink-muted">{secondary_text}</div>
                   </div>
                 </button>
               );
             })}
-          </motion.div>
-        )}
-      </AnimatePresence>
+        </div>
+      )}
 
       {isPending && (
-        <p className="mt-1 text-xs text-gray-500">Loading address suggestions…</p>
+        <p className="mt-2 text-xs text-ink-muted">Loading address suggestions…</p>
       )}
       {!HAS_PLACES_KEY && (
-        <p className="mt-1 text-xs text-gray-500">
+        <p className="mt-2 text-xs text-ink-muted">
           Type your full address — suggestions are unavailable right now.
         </p>
       )}

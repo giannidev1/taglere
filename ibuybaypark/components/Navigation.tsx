@@ -1,174 +1,189 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
 import { Menu, X } from 'lucide-react';
-import Button from './ui/Button';
-import { useScrollProgress } from '@/lib/hooks/useScrollProgress';
+import { ButtonLink } from './ui/Button';
 
-const navLinks = [
-  { label: 'Why cash', href: 'why-cash' },
-  { label: 'How it works', href: 'process' },
-  { label: 'About', href: 'about' },
-  { label: 'FAQ', href: 'faq' },
-];
+const NAV_LINKS = [
+  { label: 'Why cash', href: '#why-cash' },
+  { label: 'How it works', href: '#process' },
+  { label: 'About', href: '#about' },
+  { label: 'FAQ', href: '#faq' },
+] as const;
 
 function Wordmark({ isDark }: { isDark: boolean }) {
   return (
-    <span className="text-2xl font-bold tracking-tight">
+    <span className="font-display text-2xl tracking-tight">
       <span
-        className={`transition-colors duration-300 ${
-          isDark ? 'text-gray-900' : 'text-white'
+        className={`transition-colors duration-500 ease-settle ${
+          isDark ? 'text-ink' : 'text-sand-light'
         }`}
       >
         I Buy{' '}
       </span>
-      <span className="text-accent">Bay Park</span>
+      <span className="italic text-accent">Bay Park</span>
     </span>
   );
 }
 
+/**
+ * Every navigation target is a real anchor, so the nav works with JavaScript
+ * disabled and smooth scrolling comes from CSS rather than a click handler.
+ *
+ * The scroll progress bar is written straight to the element's transform
+ * inside a rAF — it never goes through React state, so scrolling the page does
+ * not re-render the tree once per frame.
+ */
 export default function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const scrollProgress = useScrollProgress();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const progressRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    let frame = 0;
+    let scrolled = false;
+
+    const onScroll = () => {
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        const progress = max > 0 ? Math.min(window.scrollY / max, 1) : 0;
+
+        if (progressRef.current) {
+          progressRef.current.style.transform = `scaleX(${progress})`;
+        }
+
+        // Only touches React state when the boolean actually flips.
+        const past = window.scrollY > 50;
+        if (past !== scrolled) {
+          scrolled = past;
+          setIsScrolled(past);
+        }
+      });
+    };
+
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll, { passive: true });
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+    };
   }, []);
 
-  // Lock body scroll while the mobile overlay is open.
+  // Lock the page while the mobile overlay is open, and let Escape close it.
   useEffect(() => {
-    document.body.style.overflow = isMobileMenuOpen ? 'hidden' : '';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isMobileMenuOpen]);
+    if (!isMenuOpen) return;
 
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      setIsMobileMenuOpen(false);
-    }
-  };
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsMenuOpen(false);
+    };
+    document.addEventListener('keydown', onKeyDown);
+
+    return () => {
+      document.body.style.overflow = previous;
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [isMenuOpen]);
 
   return (
     <>
-      <motion.div
-        className="fixed top-0 left-0 right-0 h-1 bg-accent origin-left z-[100]"
-        style={{ scaleX: scrollProgress / 100 }}
+      <div
+        ref={progressRef}
+        aria-hidden="true"
+        className="fixed inset-x-0 top-0 z-[100] h-0.5 origin-left bg-accent"
+        style={{ transform: 'scaleX(0)' }}
       />
 
-      <motion.nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      <nav
+        className={`fixed inset-x-0 top-0 z-50 transition-[background-color,padding,box-shadow] duration-500 ease-settle ${
           isScrolled
-            ? 'bg-white/90 backdrop-blur-nav shadow-sm py-4'
-            : 'bg-transparent py-6'
+            ? 'bg-sand/85 py-3 shadow-[0_1px_0_0_theme(colors.stucco)] backdrop-blur-nav'
+            : 'on-dark bg-transparent py-6'
         }`}
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
-        <div className="max-w-7xl mx-auto px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <motion.button
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              whileTap={{ scale: 0.98 }}
-              aria-label="Back to top"
-            >
-              <Wordmark isDark={isScrolled} />
-            </motion.button>
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 lg:px-8">
+          <a href="#top" className="rounded-sm">
+            <Wordmark isDark={isScrolled} />
+          </a>
 
-            <div className="hidden md:flex items-center space-x-8">
-              {navLinks.map((link, index) => (
-                <motion.button
-                  key={link.href}
-                  onClick={() => scrollToSection(link.href)}
-                  className={`relative text-sm font-medium transition-colors group ${
-                    isScrolled
-                      ? 'text-gray-600 hover:text-gray-900'
-                      : 'text-gray-300 hover:text-white'
-                  }`}
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  {link.label}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-accent transition-all duration-300 group-hover:w-full" />
-                </motion.button>
-              ))}
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          <div className="hidden items-center gap-9 md:flex">
+            {NAV_LINKS.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className={`wipe-link text-sm font-medium transition-colors duration-300 ${
+                  isScrolled
+                    ? 'text-ink-soft hover:text-ink'
+                    : 'text-sand/80 hover:text-sand-light'
+                }`}
               >
-                <Button size="sm" onClick={() => scrollToSection('contact')}>
-                  Get cash offer
-                </Button>
-              </motion.div>
-            </div>
+                {link.label}
+              </a>
+            ))}
 
-            <motion.button
-              className={`md:hidden p-2 ${isScrolled ? 'text-gray-900' : 'text-white'}`}
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              whileTap={{ scale: 0.95 }}
-              aria-label="Toggle menu"
-              aria-expanded={isMobileMenuOpen}
-            >
-              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-            </motion.button>
+            <ButtonLink href="#contact" size="sm">
+              Get cash offer
+            </ButtonLink>
           </div>
-        </div>
-      </motion.nav>
 
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div
-            className="fixed inset-0 z-40 md:hidden"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+          <button
+            type="button"
+            className={`-mr-2 p-2 transition-colors md:hidden ${
+              isScrolled ? 'text-ink' : 'text-sand-light'
+            }`}
+            onClick={() => setIsMenuOpen((open) => !open)}
+            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={isMenuOpen}
+            aria-controls="mobile-menu"
           >
-            <motion.div
-              className="absolute inset-0 bg-brand/95 backdrop-blur-lg"
-              onClick={() => setIsMobileMenuOpen(false)}
-            />
+            {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
+      </nav>
 
-            <motion.div
-              className="relative h-full flex flex-col items-center justify-center space-y-8"
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+      {/*
+        Always in the DOM so opening it animates transform and opacity only.
+        `invisible` keeps it out of the tab order and the accessibility tree
+        while closed, so it can never trap focus.
+      */}
+      <div
+        id="mobile-menu"
+        className={`on-dark fixed inset-0 z-40 bg-brand-deep/95 backdrop-blur-lg transition-[opacity,transform] duration-500 ease-settle md:hidden ${
+          isMenuOpen
+            ? 'visible translate-y-0 opacity-100'
+            : 'invisible -translate-y-2 opacity-0'
+        }`}
+      >
+        <div className="flex h-full flex-col items-center justify-center gap-9">
+          {NAV_LINKS.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              onClick={() => setIsMenuOpen(false)}
+              className="font-display text-3xl text-sand-light transition-colors duration-300 hover:text-accent"
             >
-              {navLinks.map((link, index) => (
-                <motion.button
-                  key={link.href}
-                  onClick={() => scrollToSection(link.href)}
-                  className="text-3xl font-semibold text-white hover:text-accent transition-colors"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  {link.label}
-                </motion.button>
-              ))}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-              >
-                <Button size="lg" onClick={() => scrollToSection('contact')}>
-                  Get cash offer
-                </Button>
-              </motion.div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              {link.label}
+            </a>
+          ))}
+
+          <ButtonLink
+            href="#contact"
+            size="lg"
+            className="mt-4"
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Get cash offer
+          </ButtonLink>
+        </div>
+      </div>
     </>
   );
 }

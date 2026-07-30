@@ -101,6 +101,29 @@
     background-size: 100% 1px;
   }
 
+  /* --- FAQ ---------------------------------------------------------------
+   * The answer fades and rises into the space the browser has already opened,
+   * so the disclosure costs no animated layout property.                    */
+  .faq[open] .faq-body {
+    animation: faq-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes faq-in {
+    from { opacity: 0; transform: translate3d(0, -6px, 0); }
+    to { opacity: 1; transform: none; }
+  }
+
+  /* Reusable entrance for content that appears in already-reserved space —
+     form validation messages, the submit result. */
+  .fade-up {
+    animation: faq-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* Safari still paints the default disclosure triangle without this. */
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
   /* --- Thin rules instead of card shadows -------------------------------- */
   .rule {
     border: 0;

@@ -92,7 +92,6 @@ export default function Hero() {
     <div ref={scope} className="relative h-svh">
       <section
         data-stage
-        aria-label="Sell your Bay Park home for cash"
         className="on-dark hero-gradient fixed inset-0 z-0 h-svh overflow-hidden bg-brand-deep"
       >
         {/* Plane 1 — the photograph. Slowest. */}

@@ -6,6 +6,7 @@ import { AssociationSpecAssociationCategoryEnum } from '@hubspot/api-client/lib/
 import { SITE, HUBSPOT_LEAD_SOURCE } from '@/lib/site';
 import {
   CONDITION_OPTIONS,
+  HONEYPOT_FIELD,
   TIMELINE_OPTIONS,
   isValidCondition,
   isValidTimeline,
@@ -251,6 +252,14 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { name, email, phone, propertyAddress, timeline, condition, message } = body;
+
+    // Honeypot. The field is off-screen and out of the tab order, so anything
+    // that fills it in is automated. Answer with a normal success response and
+    // drop it — telling a bot it was caught only teaches it to try again.
+    if (typeof body[HONEYPOT_FIELD] === 'string' && body[HONEYPOT_FIELD].trim() !== '') {
+      console.warn('Contact form: honeypot tripped, submission dropped.');
+      return NextResponse.json({ success: true }, { status: 200 });
+    }
 
     if (!name || !email || !phone || !propertyAddress) {
       return NextResponse.json(

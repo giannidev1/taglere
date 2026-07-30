@@ -32,6 +32,18 @@ export interface LeadPayload {
   message?: string;
 }
 
+/**
+ * Honeypot field name, shared so the form and the route cannot drift apart.
+ *
+ * The input is rendered off-screen, taken out of the tab order and hidden from
+ * the accessibility tree, so no person ever meets it. A submission that has it
+ * filled in is answered with a normal success response and quietly dropped —
+ * telling a bot it was caught only teaches it to try again.
+ *
+ * Deliberately plausible-looking: bots fill in what looks like a real field.
+ */
+export const HONEYPOT_FIELD = 'company';
+
 /** Turns a stored value back into its human label for emails and CRM notes. */
 export function labelFor(
   options: ReadonlyArray<{ value: string; label: string }>,
