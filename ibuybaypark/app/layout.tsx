@@ -1,15 +1,28 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Fraunces, Archivo } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import SchemaMarkup from "@/components/SchemaMarkup";
 import Analytics from "@/components/Analytics";
 import { SITE } from "@/lib/site";
 
-const inter = Inter({
+/**
+ * Display: Fraunces, for its genuine optical-size axis — headline sizes get
+ * different letterforms rather than a scaled-up text cut. SOFT and WONK are
+ * dialled toward the warm, slightly irregular end.
+ */
+const display = Fraunces({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-inter",
+  variable: "--font-display",
+  axes: ["SOFT", "WONK", "opsz"],
+});
+
+/** Body: Archivo, a quiet wide-set grotesque. Carries small caps well. */
+const body = Archivo({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-body",
 });
 
 export const metadata: Metadata = {
@@ -54,24 +67,39 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * Marks the document as scripted before first paint. Every hidden-then-revealed
+ * state in globals.css is scoped to `.js`, so with JavaScript disabled this
+ * class never lands and the page renders fully visible instead of blank.
+ */
+const JS_FLAG = "document.documentElement.classList.add('js')";
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang="en" className={`${display.variable} ${body.variable}`}>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: JS_FLAG }} />
         <SchemaMarkup />
+      </head>
+      <body className="font-sans">
+        {children}
+
+        {/*
+          Places autocomplete enhances one optional convenience field, so it
+          must not block first paint. `afterInteractive` keeps it off the
+          critical path; AddressAutocomplete waits for it and degrades to a
+          plain text input if it never arrives.
+        */}
         {process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY && (
           <Script
             src={`https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_PLACES_API_KEY}&libraries=places`}
-            strategy="beforeInteractive"
+            strategy="afterInteractive"
           />
         )}
-      </head>
-      <body className={`${inter.variable} font-sans`}>
-        {children}
         <Analytics />
       </body>
     </html>

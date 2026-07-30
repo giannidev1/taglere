@@ -1,42 +1,62 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useInView } from 'framer-motion';
+import { usePrefersReducedMotion } from './usePrefersReducedMotion';
 
-export function useCountUp(
-  end: number,
-  duration: number = 2000,
-  start: number = 0
-) {
-  const [count, setCount] = useState(start);
-  const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true });
-  const hasAnimated = useRef(false);
+/**
+ * Counts a figure up when it first enters view, once.
+ *
+ * The returned value starts at `end` rather than at zero, so a server render —
+ * or a client with JavaScript disabled — shows the real number rather than
+ * "$0". The count only ever winds back to its start once we know the element
+ * is about to be watched.
+ *
+ * Under reduced motion the figure simply stays at its final value.
+ */
+export function useCountUp(end: number, duration: number = 1600, start: number = 0) {
+  const ref = useRef<HTMLElement>(null);
+  const [count, setCount] = useState(end);
+  const prefersReduced = usePrefersReducedMotion();
 
   useEffect(() => {
-    if (!isInView || hasAnimated.current) return;
+    const element = ref.current;
+    if (!element || prefersReduced) {
+      setCount(end);
+      return;
+    }
 
-    hasAnimated.current = true;
-    const startTime = Date.now();
-    const difference = end - start;
+    let frame = 0;
+    let startedAt = 0;
 
-    const animate = () => {
-      const now = Date.now();
-      const elapsed = now - startTime;
-      const progress = Math.min(elapsed / duration, 1);
+    const step = (now: number) => {
+      if (!startedAt) startedAt = now;
+      const progress = Math.min((now - startedAt) / duration, 1);
+      // Quartic ease-out: fast to settle, long tail, no bounce.
+      const eased = 1 - Math.pow(1 - progress, 4);
 
-      // Easing function for smooth animation
-      const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-
-      setCount(Math.floor(start + difference * easeOutQuart));
-
-      if (progress < 1) {
-        requestAnimationFrame(animate);
-      }
+      setCount(Math.round(start + (end - start) * eased));
+      if (progress < 1) frame = requestAnimationFrame(step);
     };
 
-    animate();
-  }, [isInView, end, start, duration]);
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          observer.unobserve(entry.target);
+          setCount(start);
+          frame = requestAnimationFrame(step);
+        }
+      },
+      { rootMargin: '0px 0px -15% 0px', threshold: 0 }
+    );
+
+    observer.observe(element);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
+  }, [end, start, duration, prefersReduced]);
 
   return { ref, count };
 }

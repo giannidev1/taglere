@@ -2,149 +2,220 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ---------------------------------------------------------------------------
+ * Motion contract
+ *
+ * 1. Reveal state is scoped to `.js`, a class an inline script in <head> puts
+ *    on <html> before first paint. With JavaScript off the class never lands,
+ *    so nothing is ever hidden — no content is gated behind JS.
+ * 2. `prefers-reduced-motion: reduce` forces every revealable element to its
+ *    final state regardless of whether the observer ever fired. Nothing can be
+ *    left at opacity 0.
+ * 3. Only transform and opacity are animated, anywhere.
+ * ------------------------------------------------------------------------- */
+
 @layer base {
-  :root {
-    --font-inter: 'Inter', system-ui, -apple-system, sans-serif;
-  }
-
-  * {
-    @apply border-gray-200;
-  }
-
   html {
     scroll-behavior: smooth;
+    /* Keeps anchored sections clear of the fixed nav. */
+    scroll-padding-top: 5rem;
+    background-color: theme('colors.sand.DEFAULT');
   }
 
   body {
-    @apply bg-white text-gray-600 antialiased;
+    @apply bg-sand text-ink-soft antialiased;
+    font-feature-settings: 'kern' 1, 'liga' 1;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply text-gray-900 font-semibold;
+    @apply text-ink font-display font-medium;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Figures never re-flow while a slider is dragged. */
+  .tnum, [data-figure] {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  ::selection {
+    background-color: theme('colors.accent.soft');
+    color: theme('colors.ink.DEFAULT');
+  }
+}
+
+@layer components {
+  /* --- Staged reveal -----------------------------------------------------
+   * Elements translate up and fade in. Space is reserved by normal layout
+   * before the animation runs, so a reveal can never shift the page.        */
+  .js [data-reveal] {
+    opacity: 0;
+    transform: translate3d(0, var(--reveal-shift, 28px), 0);
+    transition:
+      opacity 0.75s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.75s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--reveal-delay, 0ms);
+  }
+
+  .js [data-reveal].is-revealed {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  /* --- Masked line reveal, for the hero headline ------------------------- */
+  .line-mask {
+    display: block;
+    overflow: hidden;
+    /* A little breathing room so descenders aren't clipped by the mask. */
+    padding-bottom: 0.12em;
+    margin-bottom: -0.12em;
+  }
+
+  .js .line-mask > span {
+    display: block;
+    transform: translate3d(0, 110%, 0);
+    transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1);
+    transition-delay: var(--line-delay, 0ms);
+  }
+
+  .js .line-mask.is-revealed > span {
+    transform: translate3d(0, 0, 0);
+  }
+
+  /* --- Directional underline wipe ---------------------------------------- */
+  .wipe-link {
+    position: relative;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 0% 1px;
+    transition: background-size 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .wipe-link:hover,
+  .wipe-link:focus-visible {
+    background-size: 100% 1px;
+  }
+
+  /* --- Thin rules instead of card shadows -------------------------------- */
+  .rule {
+    border: 0;
+    border-top: 1px solid theme('colors.stucco');
   }
 }
 
 @layer utilities {
-  /* Smooth scroll for internal links */
-  .scroll-smooth {
-    scroll-behavior: smooth;
-  }
-
-  /* Grain texture overlay */
-  .grain {
-    position: relative;
-  }
-
+  /* Film grain. Decorative only — always aria-hidden at the call site. */
   .grain::before {
     content: '';
     position: absolute;
     inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
     pointer-events: none;
-    opacity: 0.5;
+    opacity: 0.55;
+    mix-blend-mode: overlay;
   }
 
-  /* Hero fallback gradient — used if the hero photo is missing */
+  /* Hero fallback, only visible if the photograph fails to load. */
   .hero-gradient {
-    background: radial-gradient(circle at 50% 50%, #16394d 0%, #0e2a3a 50%, #07161f 100%);
-    position: relative;
+    background:
+      radial-gradient(120% 90% at 50% 110%, #1b535a 0%, #123a40 45%, #0b262b 100%);
   }
 
-  .hero-gradient::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at 30% 40%, rgba(224, 139, 76, 0.1) 0%, transparent 50%);
-    pointer-events: none;
+  /* Scrim under hero type. Sized so text clears AA against the photograph. */
+  .hero-scrim {
+    background:
+      linear-gradient(to bottom, rgba(11, 38, 43, 0.55) 0%, rgba(11, 38, 43, 0.30) 35%, rgba(11, 38, 43, 0.72) 100%);
   }
 
-  /* Accent glow */
-  .accent-glow {
-    box-shadow: 0 0 30px rgba(224, 139, 76, 0.35);
-  }
-
-  /* Shimmer effect for buttons */
-  @keyframes shimmer {
-    0% {
-      background-position: -200% center;
-    }
-    100% {
-      background-position: 200% center;
-    }
-  }
-
-  .shimmer {
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(255, 255, 255, 0.3) 50%,
-      transparent 100%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 2s infinite;
-  }
-
-  /* Backdrop blur utility */
   .backdrop-blur-nav {
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
   }
 
-  /* Text gradient — sunset orange into warm sand */
-  .text-gradient {
-    background: linear-gradient(135deg, #e08b4c 0%, #f5d9bf 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  /* Hero scroll cue: a mark falling down a hairline, ~2.4s. Well under the
+     three-flashes-per-second ceiling. */
+  .cue-run {
+    animation: cue-fall 2.4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
   }
 
-  /* Range slider thumb — used by the net proceeds calculator */
+  @keyframes cue-fall {
+    0% { transform: translateY(-100%); }
+    60%, 100% { transform: translateY(300%); }
+  }
+
+  /* Range slider — the calculator's only control. */
+  .slider {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+  }
+
+  .slider::-webkit-slider-runnable-track {
+    height: 4px;
+    border-radius: 9999px;
+    background: theme('colors.stucco');
+  }
+
+  .slider::-moz-range-track {
+    height: 4px;
+    border-radius: 9999px;
+    background: theme('colors.stucco');
+  }
+
   .slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
+    margin-top: -11px;
     border-radius: 9999px;
-    background: #e08b4c;
-    border: 3px solid #ffffff;
-    box-shadow: 0 2px 10px rgba(14, 42, 58, 0.35);
-    cursor: pointer;
+    background: theme('colors.accent.DEFAULT');
+    border: 3px solid theme('colors.sand.light');
+    cursor: grab;
+    transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .slider::-moz-range-thumb {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
     border-radius: 9999px;
-    background: #e08b4c;
-    border: 3px solid #ffffff;
-    box-shadow: 0 2px 10px rgba(14, 42, 58, 0.35);
-    cursor: pointer;
+    background: theme('colors.accent.DEFAULT');
+    border: 3px solid theme('colors.sand.light');
+    cursor: grab;
+    transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
   }
+
+  .slider:active::-webkit-slider-thumb { transform: scale(1.12); cursor: grabbing; }
+  .slider:active::-moz-range-thumb { transform: scale(1.12); cursor: grabbing; }
 }
 
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 10px;
-}
+/* Scrollbar, warmed to match the page. */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: theme('colors.sand.deep'); }
+::-webkit-scrollbar-thumb { background: theme('colors.stucco'); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: theme('colors.accent.DEFAULT'); }
 
-::-webkit-scrollbar-track {
-  @apply bg-gray-100;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply bg-gray-400 rounded-full;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-accent;
-}
-
-/* Focus states for accessibility */
+/* Visible focus on every interactive element, on light and on dark. */
 :focus-visible {
-  @apply outline-none ring-2 ring-accent ring-offset-2;
+  outline: 2px solid theme('colors.accent.DEFAULT');
+  outline-offset: 3px;
+  border-radius: 2px;
 }
 
-/* Respect the OS reduced-motion preference */
+.on-dark :focus-visible {
+  outline-color: theme('colors.accent.soft');
+}
+
+/* ---------------------------------------------------------------------------
+ * Reduced motion: every element lands in its final state. This block is the
+ * single most important rule in the file — it is what guarantees a complete,
+ * readable page when the OS asks for no animation.
+ * ------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -153,5 +224,25 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  html { scroll-behavior: auto !important; }
+
+  .js [data-reveal],
+  .js [data-reveal].is-revealed {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .js .line-mask > span,
+  .js .line-mask.is-revealed > span {
+    transform: none !important;
+  }
+
+  .line-mask { overflow: visible; }
+
+  /* Parallax and pinning are disabled in JS as well; this is the backstop. */
+  [data-parallax] {
+    transform: none !important;
   }
 }
