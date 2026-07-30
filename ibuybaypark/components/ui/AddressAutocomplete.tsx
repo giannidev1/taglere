@@ -29,6 +29,12 @@ interface AddressAutocompleteProps {
   placeholder?: string;
   id?: string;
   className?: string;
+  /**
+   * The leading pin/spinner is absolutely positioned and paired with left
+   * padding on the input. A caller that restyles the input's padding must be
+   * able to drop it, or the icon lands on top of the typed address.
+   */
+  showIcon?: boolean;
 }
 
 export default function AddressAutocomplete({
@@ -39,6 +45,7 @@ export default function AddressAutocomplete({
   placeholder = '1234 Morena Blvd, San Diego, CA 92110',
   id = 'address',
   className = '',
+  showIcon = true,
 }: AddressAutocompleteProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [isGoogleLoaded, setIsGoogleLoaded] = useState(false);
@@ -156,19 +163,21 @@ export default function AddressAutocomplete({
           onChange={handleInput}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          className={`w-full px-4 py-3 pl-11 rounded-lg border ${
+          className={`w-full px-4 py-3 ${showIcon ? 'pl-11' : ''} rounded-lg border ${
             error ? 'border-red-500' : 'border-gray-300'
           } focus:ring-2 focus:ring-accent focus:border-transparent transition-all ${className}`}
           placeholder={placeholder}
           autoComplete="off"
         />
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
-          {isPending ? (
-            <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
-          ) : (
-            <MapPin className="w-5 h-5 text-gray-400" />
-          )}
-        </div>
+        {showIcon && (
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+            {isPending ? (
+              <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+            ) : (
+              <MapPin className="w-5 h-5 text-gray-400" />
+            )}
+          </div>
+        )}
       </div>
 
       {/* Suggestions */}
