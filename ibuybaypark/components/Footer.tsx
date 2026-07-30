@@ -52,7 +52,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="space-y-4 pt-8 text-sm leading-relaxed text-sand/55">
+        <div className="space-y-4 pt-8 text-sm leading-relaxed text-sand/70">
           <p className="max-w-3xl">
             {SITE.ownerName} is a licensed California real estate broker (DRE #
             {SITE.dreLicense}) purchasing property for his own account. He is not acting

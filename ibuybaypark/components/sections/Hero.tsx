@@ -6,7 +6,7 @@ import MaskedLines from '../motion/MaskedLines';
 import ScrollCue from '../motion/ScrollCue';
 import { PLATES } from '@/lib/imagery';
 import { usePrefersReducedMotion } from '@/lib/hooks/usePrefersReducedMotion';
-import { useGsapScope, gsap } from '@/lib/hooks/useGsapScope';
+import { useGsapScope } from '@/lib/hooks/useGsapScope';
 
 /**
  * The hero is a fixed backdrop with a spacer of the same height in normal
@@ -25,7 +25,7 @@ import { useGsapScope, gsap } from '@/lib/hooks/useGsapScope';
 export default function Hero() {
   const prefersReduced = usePrefersReducedMotion();
 
-  const scope = useGsapScope<HTMLDivElement>((root) => {
+  const scope = useGsapScope<HTMLDivElement>((root, gsap) => {
     const stage = root.querySelector<HTMLElement>('[data-stage]');
     if (!stage) return;
 
@@ -103,7 +103,7 @@ export default function Hero() {
               fill
               priority
               sizes="100vw"
-              quality={78}
+              quality={64}
               className="object-cover object-[center_60%]"
             />
           </div>

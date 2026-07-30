@@ -8,14 +8,17 @@ import { SITE } from "@/lib/site";
 
 /**
  * Display: Fraunces, for its genuine optical-size axis — headline sizes get
- * different letterforms rather than a scaled-up text cut. SOFT and WONK are
- * dialled toward the warm, slightly irregular end.
+ * different letterforms rather than a scaled-up text cut.
+ *
+ * Only `opsz` is requested. Fraunces also ships SOFT and WONK, but each extra
+ * axis adds weight to a file that is preloaded ahead of the hero photograph on
+ * the wire, and neither was earning its cost against the LCP it pushed out.
  */
 const display = Fraunces({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-display",
-  axes: ["SOFT", "WONK", "opsz"],
+  axes: ["opsz"],
 });
 
 /** Body: Archivo, a quiet wide-set grotesque. Carries small caps well. */

@@ -305,7 +305,7 @@ export async function POST(request: NextRequest) {
 
     const resend = getResendClient();
 
-    // Notify Gianni.
+    // Notify Gianni. This one IS the lead.
     const leadNotification = await resend.emails.send({
       from: FROM_NOTIFICATION,
       to: SITE.email,
@@ -314,7 +314,27 @@ export async function POST(request: NextRequest) {
       html: getLeadNotificationEmail(lead),
     });
 
-    // Confirm to the seller.
+    // The Resend SDK reports failures on `error` rather than throwing, so an
+    // unchecked call returns success while the lead quietly evaporates: a bad
+    // key, an unverified sending domain or a rate limit would all leave the
+    // seller reading "check your email" about a message that was never sent.
+    // Losing a lead silently is the single most expensive thing this route can
+    // do, so a failed notification is surfaced.
+    if (leadNotification.error) {
+      console.error('Lead notification failed to send', {
+        name: leadNotification.error.name,
+        message: leadNotification.error.message,
+      });
+      return NextResponse.json(
+        {
+          error: `I couldn't get that through just now. Please call or text ${SITE.phoneDisplay} and I'll pick it up directly.`,
+        },
+        { status: 502 }
+      );
+    }
+
+    // Confirm to the seller. Best-effort by comparison: the lead is already
+    // captured above, so a failure here is logged rather than surfaced.
     const leadConfirmation = await resend.emails.send({
       from: FROM_CONFIRMATION,
       to: lead.email,
@@ -323,11 +343,17 @@ export async function POST(request: NextRequest) {
       html: getLeadConfirmationEmail(lead.name),
     });
 
+    if (leadConfirmation.error) {
+      console.warn('Seller confirmation failed to send; lead itself is safe', {
+        name: leadConfirmation.error.name,
+      });
+    }
+
     // IDs only. Never log the submitter's details or any part of an API key —
     // Vercel function logs are not the place for either.
     console.log('Lead emails sent', {
       notification: leadNotification.data?.id,
-      confirmation: leadConfirmation.data?.id,
+      confirmation: leadConfirmation.data?.id ?? 'failed',
     });
 
     // HubSpot is best-effort — a CRM failure must not lose the lead, since the

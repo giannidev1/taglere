@@ -164,7 +164,7 @@ export default function AddressAutocomplete({
           onBlur={handleBlur}
           className={`w-full rounded-none border-0 border-b bg-transparent px-0 py-3 ${
             showIcon ? 'pr-8' : ''
-          } text-ink placeholder:text-ink-muted/60 transition-colors duration-300 ease-settle focus:outline-none focus:ring-0 ${
+          } text-ink placeholder:text-ink-muted transition-colors duration-300 ease-settle focus:outline-none focus:ring-0 ${
             error
               ? 'border-red-700 focus:border-red-700'
               : 'border-ink/25 hover:border-ink/45 focus:border-accent'

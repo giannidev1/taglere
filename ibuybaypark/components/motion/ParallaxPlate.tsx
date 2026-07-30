@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import type { Plate } from '@/lib/imagery';
 import { usePrefersReducedMotion } from '@/lib/hooks/usePrefersReducedMotion';
-import { useGsapScope, gsap } from '@/lib/hooks/useGsapScope';
+import { useGsapScope } from '@/lib/hooks/useGsapScope';
 
 interface ParallaxPlateProps {
   plate: Plate;
@@ -35,7 +35,7 @@ export default function ParallaxPlate({
 }: ParallaxPlateProps) {
   const prefersReduced = usePrefersReducedMotion();
 
-  const scope = useGsapScope<HTMLDivElement>((root) => {
+  const scope = useGsapScope<HTMLDivElement>((root, gsap) => {
     const mm = gsap.matchMedia();
 
     mm.add(

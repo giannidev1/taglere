@@ -1,17 +1,20 @@
-'use client';
-
-import { ReactNode, useEffect, useRef } from 'react';
+import { ReactNode } from 'react';
 
 /**
  * Line-by-line masked reveal for the hero headline.
  *
- * Each line sits in an overflow-hidden wrapper and slides up from beneath it.
- * The hero is above the fold, so this fires on mount rather than on scroll —
- * the headline is the thing that has to earn attention immediately.
+ * Each line sits in an overflow-hidden wrapper and rises from beneath it. The
+ * motion is a pure CSS animation keyed off a per-line delay, which matters for
+ * more than tidiness: the headline is the page's LCP element, and a
+ * JS-toggled reveal meant it could not paint until React had hydrated. As CSS
+ * it starts at first paint, and the last line has landed inside 800ms.
  *
- * With JS off the `.js` scope in globals.css never applies and the lines are
- * simply visible. Under reduced motion the CSS pins them at their final
- * position, so this component's timers become inert rather than harmful.
+ * That also makes this a server component — the hero headline ships no client
+ * JavaScript at all.
+ *
+ * With JavaScript off the `.js` scope never applies and the lines are simply
+ * visible. Under reduced motion the animation is cancelled and the lines sit
+ * at their final position.
  */
 interface MaskedLinesProps {
   lines: ReactNode[];
@@ -25,33 +28,20 @@ interface MaskedLinesProps {
 
 export default function MaskedLines({
   lines,
-  startDelay = 120,
+  startDelay = 40,
   stagger = 80,
   className = '',
   lineClassName,
 }: MaskedLinesProps) {
-  const ref = useRef<HTMLSpanElement>(null);
-
-  useEffect(() => {
-    const root = ref.current;
-    if (!root) return;
-
-    // One frame's grace so the initial transform is committed before the
-    // transition to the final state begins.
-    const frame = requestAnimationFrame(() => {
-      root.querySelectorAll('.line-mask').forEach((mask) => {
-        mask.classList.add('is-revealed');
-      });
-    });
-
-    return () => cancelAnimationFrame(frame);
-  }, []);
-
   return (
-    <span ref={ref} className={className}>
+    <span className={className}>
       {lines.map((line, index) => (
         <span key={index} className={`line-mask ${lineClassName?.(index) ?? ''}`}>
-          <span style={{ '--line-delay': `${startDelay + index * stagger}ms` } as React.CSSProperties}>
+          <span
+            style={
+              { '--line-delay': `${startDelay + index * stagger}ms` } as React.CSSProperties
+            }
+          >
             {line}
           </span>
         </span>

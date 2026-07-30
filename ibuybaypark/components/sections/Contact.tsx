@@ -106,7 +106,7 @@ export default function Contact() {
   const fieldClasses = (hasError: boolean) =>
     [
       'w-full rounded-none border-0 border-b bg-transparent px-0 py-3 text-ink',
-      'placeholder:text-ink-muted/60',
+      'placeholder:text-ink-muted',
       'transition-colors duration-300 ease-settle',
       'focus:outline-none focus:ring-0',
       hasError
